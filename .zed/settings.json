@@ -1,0 +1,33 @@
+// Project-local Zed settings for this Python folder.
+// Overrides/extends ~/.config/zed/settings.json for files under this directory.
+{
+  "languages": {
+    "Python": {
+      // pyright = type checking, hover, go-to-definition, completions
+      // ruff    = linting + fast formatting + import sorting
+      "language_servers": ["pyright", "ruff"],
+      "format_on_save": "on",
+      "formatter": [
+        { "language_server": { "name": "ruff" } },
+        { "code_action": "source.fixAll.ruff" },
+        { "code_action": "source.organizeImports.ruff" }
+      ]
+    }
+  },
+  "lsp": {
+    "pyright": {
+      "settings": {
+        "python": {
+          // Resolve imports (pydantic, etc.) from this project's venv
+          "pythonPath": ".venv/bin/python"
+        },
+        "python.analysis": {
+          "typeCheckingMode": "basic",
+          "diagnosticMode": "workspace",
+          "autoImportCompletions": true
+        }
+      }
+    }
+    // ruff reads its config from pyproject.toml ([tool.ruff]) automatically
+  }
+}
