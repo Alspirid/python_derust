@@ -12,3 +12,4 @@ __pycache__/
 
 # Editor
 .zed/settings.local.json
+.idea/

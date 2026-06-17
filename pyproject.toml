@@ -10,6 +10,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff>=0.15",
+    "pytest>=8",
 ]
 
 [tool.ruff]
@@ -24,3 +25,8 @@ select = ["E", "F", "I", "UP", "B"]
 
 [tool.ruff.format]
 quote-style = "double"
+
+[tool.pytest.ini_options]
+# src/ on the path so tests can do `from exercises.exercise_01 import ...`
+pythonpath = ["src"]
+testpaths = ["tests"]
