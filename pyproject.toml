@@ -27,6 +27,14 @@ select = ["E", "F", "I", "UP", "B"]
 quote-style = "double"
 
 [tool.pytest.ini_options]
-# src/ on the path so tests can do `from exercises.exercise_01 import ...`
+# src/ on the path so tests can do `from exercises.<module> import ...`
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.pyright]
+# Mirror pytest's pythonpath so the editor / type checker also resolves
+# `exercises.*` imports. pytest config alone doesn't reach Pyright.
+extraPaths = ["src"]
+# Resolve third-party imports (pytest, pydantic) from the project venv.
+venvPath = "."
+venv = ".venv"

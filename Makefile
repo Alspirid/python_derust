@@ -1,7 +1,7 @@
 # Common project commands. Run `make` or `make help` to list them.
 .DEFAULT_GOAL := help
 
-.PHONY: help install test test-v lint fmt fmt-check fix check clean
+.PHONY: help install test test-v lint fmt fmt-check fix typecheck check clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -28,7 +28,10 @@ fmt-check: ## Check formatting without changing files
 fix: ## Auto-fix lint issues with ruff
 	uv run ruff check --fix .
 
-check: lint fmt-check test ## Run lint + format check + tests (CI-style)
+typecheck: ## Type-check with pyright (via uvx — not a project dependency)
+	uvx pyright src tests
+
+check: lint fmt-check typecheck test ## Run lint + format check + type check + tests (CI-style)
 
 clean: ## Remove Python/tool caches
 	find . -path ./.venv -prune -o -name __pycache__ -type d -print -exec rm -rf {} +

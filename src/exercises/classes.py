@@ -13,7 +13,9 @@ class Point:
         return ((self.x - p.x) ** 2 + (self.y - p.y) ** 2) ** 0.5
 
     def __repr__(self) -> str:
-        return f"Point class: x={self.x}, y={self.y}"
+        return f"Point({self.x}, {self.y})"
 
-    def __eq__(self, other: Point) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Point):
+            return NotImplemented
         return self.x == other.x and self.y == other.y
