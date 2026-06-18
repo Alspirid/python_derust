@@ -2,7 +2,7 @@
 name = "python-ai-coding"
 version = "0.1.0"
 description = "Python AI coding scratchpad"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2",
 ]
@@ -15,7 +15,7 @@ dev = [
 
 [tool.ruff]
 line-length = 88
-target-version = "py311"
+target-version = "py313"
 # helper.py is a snippets cheat-sheet, not a runnable module
 extend-exclude = ["helper.py"]
 
