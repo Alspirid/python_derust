@@ -10,24 +10,24 @@
       "formatter": [
         { "language_server": { "name": "ruff" } },
         { "code_action": "source.fixAll.ruff" },
-        { "code_action": "source.organizeImports.ruff" }
-      ]
-    }
+        { "code_action": "source.organizeImports.ruff" },
+      ],
+    },
   },
   "lsp": {
     "pyright": {
       "settings": {
         "python": {
           // Resolve imports (pydantic, etc.) from this project's venv
-          "pythonPath": ".venv/bin/python"
+          "pythonPath": ".venv/bin/python",
         },
         "python.analysis": {
           "typeCheckingMode": "basic",
           "diagnosticMode": "workspace",
-          "autoImportCompletions": true
-        }
-      }
-    }
+          "autoImportCompletions": true,
+        },
+      },
+    },
     // ruff reads its config from pyproject.toml ([tool.ruff]) automatically
-  }
+  },
 }
