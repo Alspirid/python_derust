@@ -8,4 +8,3 @@ def recent[T](stream: Iterable[T], n: int) -> list[T]:
 
 print(recent(range(1000), 3))  # → [997, 998, 999]
 print(recent(["a", "b", "c", "d"], 2))  # → ["c", "d"]
-    

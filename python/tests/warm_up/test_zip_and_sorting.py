@@ -1,6 +1,6 @@
 import pytest
 
-from exercises.zip_and_sorting import combine, top_scorers
+from exercises.warm_up.zip_and_sorting import combine, top_scorers
 
 
 @pytest.mark.parametrize(
