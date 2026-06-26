@@ -67,7 +67,7 @@ pnpm -C typescript exercise src/exercises/warm_up/decorators.ts # TypeScript (ts
 | warm_up/bi_sect                   |   ✅   |     ⬜     |
 | warm_up/callable                  |   ✅   |     ⬜     |
 | warm_up/classes                   |   ✅   |     ⬜     |
-| warm_up/comprehensions            |   ✅   |     ⬜     |
+| warm_up/comprehensions            |   ✅   |     ✅     |
 | warm_up/concurrency_limit         |   ✅   |     ⬜     |
 | warm_up/context_manager           |   ✅   |     ⬜     |
 | warm_up/dataclass                 |   ✅   |     ⬜     |
