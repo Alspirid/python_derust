@@ -1,6 +1,6 @@
 import pytest
 
-from exercises.generators_and_args import (
+from exercises.warm_up.generators_and_args import (
     add_tag,
     average,
     common,

@@ -1,6 +1,6 @@
 import pytest
 
-from exercises.dataclass import Point
+from exercises.warm_up.classes import Point
 
 
 @pytest.mark.parametrize(
@@ -29,4 +29,4 @@ def test_point_equality(a, b, expected):
 
 
 def test_repr():
-    assert repr(Point(1, 2)) == "Point(x=1, y=2)"
+    assert repr(Point(1, 2)) == "Point(1, 2)"

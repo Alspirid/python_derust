@@ -1,38 +1,42 @@
-# Common project commands. Run `make` or `make help` to list them.
+# Root orchestrator for the Python + TypeScript monorepo.
+# Owns nothing language-specific — it fans out to each subdir's own tooling.
+# Run `make` or `make help` to list targets.
 .DEFAULT_GOAL := help
 
-.PHONY: help install test test-v lint fmt fmt-check fix typecheck check clean
+.PHONY: help install test-all lint-all fmt-all check-all clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
-install: ## Sync dependencies (incl. the dev group)
-	uv sync
+install: ## Install both toolchains
+	$(MAKE) -C python install
+	pnpm -C typescript install
 
-test: ## Run the test suite
-	uv run pytest
+test-all: ## Run both test suites
+	$(MAKE) -C python test
+	pnpm -C typescript test
 
-test-v: ## Run the test suite, verbose (one line per case)
-	uv run pytest -v
+lint-all: ## Lint both languages
+	$(MAKE) -C python lint
+	pnpm -C typescript lint
 
-lint: ## Lint with ruff
-	uv run ruff check .
+fmt-all: ## Format both languages
+	$(MAKE) -C python fmt
+	pnpm -C typescript fmt
 
-fmt: ## Auto-format with ruff
-	uv run ruff format .
+check-all: ## CI-style full check for both (lint + format + types + tests)
+	$(MAKE) -C python check
+	pnpm -C typescript check
 
-fmt-check: ## Check formatting without changing files
-	uv run ruff format --check .
+clean: ## Clean caches/artifacts in both
+	$(MAKE) -C python clean
+	rm -rf typescript/node_modules typescript/coverage
 
-fix: ## Auto-fix lint issues with ruff
-	uv run ruff check --fix .
+# Passthroughs: `make py-<target>` -> python Makefile, `make ts-<script>` -> pnpm script.
+# e.g. `make py-test-v`, `make ts-typecheck`, `make ts-fix`.
+py-%: ## Run a target in python/ (e.g. make py-test)
+	$(MAKE) -C python $*
 
-typecheck: ## Type-check with pyright (via uvx — not a project dependency)
-	uvx pyright src tests
-
-check: lint fmt-check typecheck test ## Run lint + format check + type check + tests (CI-style)
-
-clean: ## Remove Python/tool caches
-	find . -path ./.venv -prune -o -name __pycache__ -type d -print -exec rm -rf {} +
-	rm -rf .pytest_cache .ruff_cache
+ts-%: ## Run a pnpm script in typescript/ (e.g. make ts-test)
+	pnpm -C typescript $*

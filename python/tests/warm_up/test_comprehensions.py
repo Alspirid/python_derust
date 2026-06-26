@@ -1,6 +1,6 @@
 import pytest
 
-from exercises.comprehensions import square_odds, sum_evens, word_lengths
+from exercises.warm_up.comprehensions import square_odds, sum_evens, word_lengths
 
 
 @pytest.mark.parametrize(

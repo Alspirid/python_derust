@@ -1,0 +1,31 @@
+{
+  "name": "typescript-exercises",
+  "version": "0.1.0",
+  "description": "TypeScript practice exercises (parallel to the Python ones)",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome check .",
+    "fmt": "biome format --write .",
+    "fmt:check": "biome format .",
+    "fix": "biome check --write .",
+    "typecheck": "tsc --noEmit",
+    "check": "biome check . && tsc --noEmit && vitest run",
+    "exercise": "tsx"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.1",
+    "@types/node": "^26.0.1",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}

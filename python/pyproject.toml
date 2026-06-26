@@ -16,8 +16,8 @@ dev = [
 [tool.ruff]
 line-length = 88
 target-version = "py313"
-# helper.py is a snippets cheat-sheet, not a runnable module
-extend-exclude = ["helper.py"]
+# helper.txt is a snippets cheat-sheet, not a runnable module
+extend-exclude = ["helper.txt"]
 
 [tool.ruff.lint]
 # E/W: pycodestyle, F: pyflakes, I: isort, UP: pyupgrade, B: bugbear

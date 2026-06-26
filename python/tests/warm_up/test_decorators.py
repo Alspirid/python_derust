@@ -1,4 +1,4 @@
-from exercises.decorators import add, total
+from exercises.warm_up.decorators import add, total
 
 
 def test_add():
