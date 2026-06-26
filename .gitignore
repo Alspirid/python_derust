@@ -10,6 +10,11 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
+# Node / TypeScript
+node_modules/
+*.tsbuildinfo
+coverage/
+
 # Editor
 .zed/settings.local.json
 .idea/
