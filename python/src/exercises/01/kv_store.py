@@ -71,15 +71,33 @@ class MemoryDB:
             for x in sorted(self.store.items(), key=lambda x: x[0], reverse=reverse)
         ]
 
+    def backup(self) -> dict:
+        self._purge_all()
+        now = time.monotonic()
+        return {
+            k: {"value": v, "ttl": exp - now if exp is not None else None}
+            for k, (v, exp) in self.store.items()
+        }
+
+    def restore(self, snapshot: dict) -> None:
+        now = time.monotonic()
+        self.store = {
+            k: (d["value"], now + d["ttl"] if d["ttl"] is not None else None)
+            for k, d in snapshot.items()
+        }
+
 
 db = MemoryDB()
 
-db.set("banana", "yellow")
-db.set("apple", "red")
-db.set("cherry", "dark red")
+db.set("permanent", "stays")
+db.set("temp", "goes", ttl=10.0)
+time.sleep(2.0)
 
-print(db.items_sorted())
-# [("apple", "red"), ("banana", "yellow"), ("cherry", "dark red")]
+snap = db.backup()
+print(snap)
+# "temp" should have ~8s remaining, not 10
 
-print(db.items_sorted(reverse=True))
-# [("cherry", "dark red"), ("banana", "yellow"), ("apple", "red")]
+db2 = MemoryDB()
+db2.restore(snap)
+db2.get("permanent")  # "stays"
+print(db2.get("temp"))  # "goes" (with ~8s left)
