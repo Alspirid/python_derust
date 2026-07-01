@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Python AI coding scratchpad"
 requires-python = ">=3.13"
 dependencies = [
+    "numpy>=2.5.0",
     "pydantic>=2",
 ]
 

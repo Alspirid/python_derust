@@ -17,10 +17,9 @@
   "lsp": {
     "pyright": {
       "settings": {
-        "python": {
-          // Resolve imports (pydantic, etc.) from this project's venv
-          "pythonPath": ".venv/bin/python",
-        },
+        // No hardcoded pythonPath: Zed's toolchain selector (status bar)
+        // auto-detects python/.venv per-subproject, so imports resolve whether
+        // the workspace root is python/ or the monorepo root.
         "python.analysis": {
           "typeCheckingMode": "basic",
           "diagnosticMode": "workspace",
