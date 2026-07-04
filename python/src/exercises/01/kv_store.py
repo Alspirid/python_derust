@@ -14,51 +14,58 @@ items_sorted(reverse: bool = False) -> list[tuple[str, str]]
 """
 
 import time
+from typing import TypedDict
+
+_MISSING = object()
+
+
+class StoreItem(TypedDict):
+    val: str
+    expiry: float | None
+
+
+class BackupItem(TypedDict):
+    val: str
+    ttl: float | None
 
 
 class MemoryDB:
-    _MISSING = object()
-    store: dict[str, tuple[str, float | None]]
+    store: dict[str, StoreItem]
 
     def __init__(self) -> None:
         self.store = {}
 
-    def set(self, key: str, value: str, ttl: float | None = None) -> None:
-        if not key:
-            raise ValueError("key can not be empty")
-        expiry: float | None
-
-        if ttl is not None and ttl > 0.0:
-            expiry = time.monotonic() + ttl
-        else:
-            expiry = None
-        self.store[key] = (value, expiry)
-
-    def _is_expired(self, key) -> bool:
-        result = self.store.get(key)
-        if result is None:
+    def _is_expired(self, key: str) -> bool:
+        store_item = self.store.get(key)
+        if store_item is None:
             return False
 
-        _, expiry = result
-        if expiry is not None and time.monotonic() > expiry:
+        expiry = store_item["expiry"]
+        if expiry is not None and expiry < time.monotonic():
             del self.store[key]
             return True
 
         return False
 
+    def set(self, key: str, value: str, ttl: float | None = None) -> None:
+        if ttl is not None and ttl < 0:
+            raise ValueError(f"ttl must be non-negative, got {ttl}")
+        expiry = time.monotonic() + ttl if ttl is not None else None
+        self.store[key] = {"val": value, "expiry": expiry}
+
     def get(self, key: str) -> str | None:
-        self._is_expired(key)
+        if self._is_expired(key):
+            return None
         result = self.store.get(key)
-        return result[0] if result else None
+        return result["val"] if result else None
 
     def delete(self, key: str) -> bool:
-        self._purge_all()
-        val = self.store.pop(key, self._MISSING)
-        return val is not self._MISSING
+        self._is_expired(key)
+        return self.store.pop(key, _MISSING) is not _MISSING
 
     def _purge_all(self) -> None:
-        for k in list(self.store):
-            self._is_expired(k)
+        for key in list(self.store):
+            self._is_expired(key)
 
     def __len__(self) -> int:
         self._purge_all()
@@ -67,37 +74,79 @@ class MemoryDB:
     def items_sorted(self, reverse: bool = False) -> list[tuple[str, str]]:
         self._purge_all()
         return [
-            (x[0], x[1][0])
-            for x in sorted(self.store.items(), key=lambda x: x[0], reverse=reverse)
+            (key, d["val"])
+            for (key, d) in sorted(
+                self.store.items(), key=lambda kv: kv[0], reverse=reverse
+            )
         ]
 
-    def backup(self) -> dict:
+    def backup(self) -> dict[str, BackupItem]:
         self._purge_all()
         now = time.monotonic()
-        return {
-            k: {"value": v, "ttl": exp - now if exp is not None else None}
-            for k, (v, exp) in self.store.items()
-        }
+        backup: dict[str, BackupItem] = {}
+        for key, d_value in self.store.items():
+            ttl = d_value["expiry"] - now if d_value["expiry"] is not None else None
+            backup[key] = {"val": d_value["val"], "ttl": ttl}
+        return backup
 
-    def restore(self, snapshot: dict) -> None:
+    def restore(self, backup: dict[str, BackupItem]) -> None:
         now = time.monotonic()
-        self.store = {
-            k: (d["value"], now + d["ttl"] if d["ttl"] is not None else None)
-            for k, d in snapshot.items()
-        }
+        restored: dict[str, StoreItem] = {}
+        for k, d in backup.items():
+            expiry = d["ttl"] + now if d["ttl"] is not None else None
+            restored[k] = {"val": d["val"], "expiry": expiry}
+
+        self.store = restored
 
 
-db = MemoryDB()
+if __name__ == "__main__":
+    db = MemoryDB()
 
-db.set("permanent", "stays")
-db.set("temp", "goes", ttl=10.0)
-time.sleep(2.0)
+    # basic ops
+    db.set("banana", "yellow")
+    db.set("apple", "red")
+    db.set("cherry", "dark red")
+    assert db.get("apple") == "red"
+    assert db.get("missing") is None
+    assert len(db) == 3
 
-snap = db.backup()
-print(snap)
-# "temp" should have ~8s remaining, not 10
+    # delete
+    assert db.delete("banana") is True
+    assert db.delete("banana") is False
+    assert len(db) == 2
 
-db2 = MemoryDB()
-db2.restore(snap)
-db2.get("permanent")  # "stays"
-print(db2.get("temp"))  # "goes" (with ~8s left)
+    # sorted output
+    db.set("banana", "yellow")
+    assert db.items_sorted() == [
+        ("apple", "red"),
+        ("banana", "yellow"),
+        ("cherry", "dark red"),
+    ]
+    assert db.items_sorted(reverse=True)[0] == ("cherry", "dark red")
+
+    # TTL
+    db.set("temp", "gone soon", ttl=0.1)
+    assert db.get("temp") == "gone soon"
+    time.sleep(0.15)
+    assert db.get("temp") is None
+    assert len(db) == 3
+
+    # edge: ttl=0.0 expires immediately
+    db.set("instant", "poof", ttl=0.0)
+    time.sleep(0.01)
+    assert db.get("instant") is None
+
+    # edge: empty-string value
+    db.set("empty", "")
+    assert db.get("empty") == ""
+    assert db.delete("empty") is True
+
+    # backup / restore
+    db2 = MemoryDB()
+    db2.set("permanent", "stays")
+    db2.set("expiring", "ticking", ttl=10.0)
+    time.sleep(0.1)
+
+    snap = db2.backup()
+    assert snap["permanent"]["ttl"] is None
+    assert 0 < snap["expiring"]["ttl"] < 10.0
